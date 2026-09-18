@@ -431,7 +431,9 @@
                 gotas[i]++;
             }
         }
-        setInterval(dibujarMatrix, isMobile ? 60 : 35); 
+        
+        // FIX 1: Guardamos el intervalo en una variable para poder detenerlo
+        let intervaloMatrix = setInterval(dibujarMatrix, isMobile ? 60 : 35); 
 
         // --- TIMELINE ---
         setTimeout(() => { document.getElementById('pantalla-conteo').classList.add('visible'); document.getElementById('texto-conteo').innerText = '3'; }, 500);
@@ -471,11 +473,18 @@
         for(let f = 1; f <= 10; f++) { misFotos.push(`foto_${f}.png`); }
 
         function detonarExplosion() {
-            document.getElementById('btn-magia').style.display = 'none'; document.getElementById('msj-listo').style.display = 'none';
+            document.getElementById('btn-magia').style.display = 'none'; 
+            document.getElementById('msj-listo').style.display = 'none';
+            
+            // FIX 2: Detener inmediatamente el Matrix al dar click para liberar al procesador
+            clearInterval(intervaloMatrix); 
+            canvas.style.display = 'none';
+            
             let w = window.innerWidth; let h = window.innerHeight;
             let cont = document.getElementById('contenedor-explosion');
             
-            let cols = isMobile ? 5 : 9; let rows = isMobile ? 5 : 9;
+            // FIX 3: Reducir la cantidad de elementos generados para evitar que los celulares colapsen la RAM
+            let cols = isMobile ? 4 : 6; let rows = isMobile ? 4 : 6;
             let cellW = w / cols; let cellH = h / rows;
             let totalElementos = cols * rows;
 
@@ -489,7 +498,8 @@
                     el.innerText = textosAmor[Math.floor(Math.random() * textosAmor.length)];
                 } else {
                     el.classList.add('flotante-img');
-                    el.innerHTML = `<img src="${misFotos[i % 10]}" onerror="this.src='https://placehold.co/100/ff4d94/FFF?text=FOTO'"/>`; 
+                    // FIX 4: Se eliminó la petición a placehold.co al fallar la imagen. Muchas peticiones web erróneas simultáneas colapsan la red y congelan el touch.
+                    el.innerHTML = `<img src="${misFotos[i % 10]}" onerror="this.style.display='none'"/>`; 
                 }
                 cont.appendChild(el);
 
@@ -504,7 +514,9 @@
                     el.style.opacity = '1';
                 }, 50);
             }
-            setTimeout(() => { document.getElementById('pantalla-carga').classList.remove('visible'); irAPantalla('pantalla-menu'); canvas.style.display = 'none'; }, 10000); 
+            
+            // FIX 5: Bajar el tiempo de espera de 10000 (10 segundos) a 4000 (4 segundos). Antes daba la ilusión de que se había trabado la pantalla.
+            setTimeout(() => { document.getElementById('pantalla-carga').classList.remove('visible'); irAPantalla('pantalla-menu'); }, 4000); 
         }
 
         // --- LÓGICA DEL REGALO 3 ---
