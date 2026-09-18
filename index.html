@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Luz</title>
+    <style>
+        /* FUENTES */
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Press+Start+2P&display=swap');
+        
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            background: #000; overflow: hidden; 
+            font-family: 'Press Start 2P', cursive; color: #ff4d94; 
+        }
+        
+        #matrix-canvas { position: absolute; top: 0; left: 0; z-index: 1; }
+        
+        /* SISTEMA DE PANTALLAS */
+        .pantalla { 
+            position: absolute; top: 0; left: 0; 
+            width: 100%; height: 100%; display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; 
+            z-index: 2; opacity: 0; transition: opacity 1s ease; 
+            pointer-events: none; 
+        }
+        .visible { opacity: 1; pointer-events: auto; }
+        
+        /* TEXTOS Y BOTONES GLOBALES */
+        .texto-gigante { font-size: 3rem; text-align: center; line-height: 1.5; text-shadow: 0 0 15px rgba(255, 77, 148, 0.8); }
+        .texto-chico { font-size: 1.2rem; margin-top: 30px; color: #fff; text-shadow: none; text-align: center; line-height: 1.5; }
+        
+        .btn-retro {
+            font-family: 'Press Start 2P', cursive;
+            background-color: rgba(255, 255, 255, 0.9); color: #333;
+            border: 4px solid #fff; border-radius: 8px;
+            padding: 15px 20px; font-size: 0.8rem; cursor: pointer;
+            box-shadow: 4px 4px 0px #000; transition: transform 0.2s ease;
+        }
+        .btn-retro:active { transform: translate(4px, 4px) !important; box-shadow: 0px 0px 0px #000; }
+        .btn-volver { position: absolute; top: 20px; left: 20px; font-size: 0.6rem; padding: 10px; z-index: 50; }
+
+        /* INTRODUCCIÓN */
+        .corazon-gigante { font-family: Arial, sans-serif; font-size: 8rem; color: #ff1a75; line-height: 1; text-align: center; margin: 0; animation: latido 1.5s infinite alternate; text-shadow: 0 0 20px #ff1a75, 0 0 40px #ff4d94; }
+        @keyframes latido { from { transform: scale(1); } to { transform: scale(1.15); } }
+        #pantalla-carga { background: radial-gradient(circle at center, #1a0033 0%, #000000 100%); z-index: 5; }
+        #porcentaje { color: #ff4d94; margin-top: 20px; font-size: 2rem; }
+        .btn-magia { background: #ff1a75; color: #fff; box-shadow: 0 0 15px #ff1a75; display: none; z-index: 10; margin-top: 30px; }
+        .flotante { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); opacity: 0; transition: all 2s cubic-bezier(0.1, 0.8, 0.3, 1); }
+        .flotante-texto { font-family: 'Press Start 2P', cursive; color: #fff; text-shadow: 0 0 10px #ff1a75, 0 0 20px #ff4d94, 0 0 30px #fff; font-size: 1rem; z-index: 20; text-align: center; white-space: nowrap; }
+        .flotante-img { z-index: 10; }
+        .flotante-img img { width: 100px; border-radius: 5px; border: 3px solid #ff4d94; box-shadow: 0 0 15px rgba(255, 77, 148, 0.6); }
+
+        /* MENÚS */
+        #pantalla-menu { background-color: #111; background-image: url('fondo_inicio.png'); background-size: cover; background-position: center; z-index: 10; }
+        .botones-container { display: flex; gap: 20px; margin-top: 30px; justify-content: center; flex-wrap: wrap; position: relative; width: 100%; }
+        #pantalla-sabia { background-color: #000; z-index: 15; }
+        #pantalla-broma { background-color: #1a1a2e; z-index: 15; }
+        .img-gatito { width: 250px; margin-bottom: 20px; image-rendering: pixelated; }
+        #pantalla-regalos { background: radial-gradient(circle at bottom, #001133 0%, #000000 100%); z-index: 10; overflow: hidden; }
+        .estrella { position: absolute; background: white; border-radius: 50%; box-shadow: 0 0 5px #fff, 0 0 10px #00e6ff; animation: parpadeo infinite alternate; z-index: 0; }
+        @keyframes parpadeo { 0% { opacity: 0.2; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1.2); } }
+        .grid-regalos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 700px; margin-top: 30px; padding: 0 20px; z-index: 2; }
+        .btn-regalo { width: 100%; padding: 25px 15px; font-size: 0.8rem; background-color: rgba(0, 0, 30, 0.7); color: #fff; border: 2px solid #00e6ff; box-shadow: 0 0 15px rgba(0, 230, 255, 0.5), inset 0 0 10px rgba(0, 230, 255, 0.3); display: flex; align-items: center; justify-content: flex-start; gap: 10px; }
+        .btn-especial { grid-column: span 2; justify-content: center; border: 2px solid #ff4d94; box-shadow: 0 0 15px rgba(255, 77, 148, 0.6), inset 0 0 10px rgba(255, 77, 148, 0.4); }
+        .icono-regalo { font-size: 1.5rem; text-shadow: none; }
+        .pantalla-regalo-abierto { background: radial-gradient(circle at center, #001133 0%, #000000 100%); z-index: 20; }
+
+        /* REGALO 1 (CARTA) */
+        .carta-contenedor { background-color: #fdfaf6; border-radius: 10px; padding: 30px; max-width: 80%; max-height: 70%; overflow-y: auto; box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); color: #333; font-family: 'Courier New', Courier, monospace; font-size: 1rem; line-height: 1.6; text-align: left; text-shadow: none; }
+        
+        /* REGALO 2 (PLAYLIST YOUTUBE) */
+        .yt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; padding: 20px; padding-bottom: 50px; }
+        .yt-item { background: rgba(20,20,30,0.8); border: 2px solid #00e6ff; border-radius: 10px; padding: 15px; box-shadow: 0 0 15px rgba(0, 230, 255, 0.3); transition: transform 0.2s; }
+        .yt-item:hover { transform: translateY(-5px); border-color: #ff4d94; box-shadow: 0 0 20px rgba(255, 77, 148, 0.5); }
+        .yt-item p { font-family: 'Courier New', Courier, monospace; font-size: 0.85rem; font-weight: bold; color: #ffb3d9; margin-top: 15px; line-height: 1.4; text-align: center; }
+
+        /* REGALO 3 (POKÉMON CON ARRANQUE INMEDIATO) */
+        #poke-fondo-animado { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; background: linear-gradient(120deg, #1a2a6c, #11998e, #38ef7d); background-size: 400% 400%; animation: gradienteCielo 15s ease infinite; }
+        @keyframes gradienteCielo { 0% {background-position: 0% 50%} 50% {background-position: 100% 50%} 100% {background-position: 0% 50%} }
+        
+        #poke-campo { position: relative; width: 90%; max-width: 800px; height: 60vh; min-height: 350px; margin: 0 auto; background-color: #4CAF50; background-image: radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 10%, rgba(0,0,0,0.6) 100%), repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.05) 20px, rgba(255,255,255,0.05) 40px); box-shadow: inset 0 0 30px rgba(0,0,0,0.8), 0 10px 20px rgba(0,0,0,0.5); border: 5px solid #fff; border-radius: 15px; z-index: 2; overflow: hidden; }
+        
+        .pokeball-container { position: absolute; width: 45px; height: 45px; cursor: pointer; z-index: 5; transition: left 4s linear, top 4s linear; }
+        .pokeball { width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(150deg, #ff4d4d 0%, #b30000 46%, #111 46%, #111 54%, #e6e6e6 54%, #ffffff 100%); border: 3px solid #222; box-shadow: inset -5px -5px 12px rgba(0,0,0,0.5), inset 3px 3px 8px rgba(255,255,255,0.4), 4px 6px 10px rgba(0,0,0,0.6); position: relative; transition: transform 0.2s ease, filter 0.2s ease; }
+        .pokeball:hover { transform: scale(1.15) rotate(15deg); filter: brightness(1.2); }
+        .pokeball::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; background: #fff; border: 3px solid #222; border-radius: 50%; box-shadow: inset -1px -1px 3px rgba(0,0,0,0.3); }
+
+        /* REGALO 4 (MÁQUINA GACHA REALISTA Y GRANDE) */
+        #gacha-container { position: relative; width: 350px; height: 500px; display: flex; flex-direction: column; align-items: center; z-index: 5; margin-top: 10px; transform: scale(1.1);}
+        .gacha-cabeza { width: 260px; height: 260px; background: rgba(20, 20, 30, 0.9); border: 10px solid #ff1a75; border-radius: 50%; position: relative; box-shadow: inset 0 -20px 40px rgba(0,0,0,0.8), 0 10px 20px rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: flex-end; }
+        .gacha-cabeza::after { content: ''; position: absolute; top: 5%; left: 10%; width: 45%; height: 45%; background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 100%); border-radius: 50%; pointer-events: none; z-index: 15; }
+        
+        #bolitas-internas { position: absolute; bottom: 10px; width: 90%; height: 70%; border-radius: 50%; position: relative; overflow: hidden; }
+        .bola-interna { position: absolute; border-radius: 50%; border: 2px solid rgba(0,0,0,0.5); box-shadow: inset -5px -5px 10px rgba(0,0,0,0.5), inset 2px 2px 5px rgba(255,255,255,0.5); }
+        @keyframes agitarLoco { 0% { transform: translate(0, 0) rotate(0deg); } 20% { transform: translate(15px, -30px) rotate(45deg); } 40% { transform: translate(-20px, 25px) rotate(-30deg); } 60% { transform: translate(25px, 15px) rotate(60deg); } 80% { transform: translate(-15px, -20px) rotate(-45deg); } 100% { transform: translate(0, 0) rotate(0deg); } }
+
+        .gacha-cuerpo { width: 230px; height: 200px; background: linear-gradient(to bottom, #ff1a75 0%, #cc0052 100%); border: 4px solid #990033; border-radius: 15px; margin-top: -15px; position: relative; display: flex; flex-direction: column; align-items: center; padding-top: 20px; box-shadow: inset -10px -10px 20px rgba(0,0,0,0.4), 0 20px 30px rgba(0,0,0,0.6); z-index: 10; }
+        
+        .btn-gacha-girar { font-family: 'Press Start 2P', cursive; font-size: 0.7rem; color: #333; background: linear-gradient(to bottom, #fff, #ddd); border: 4px solid #333; border-radius: 50%; width: 70px; height: 70px; cursor: pointer; box-shadow: 0 8px 0 #990033, 0 15px 10px rgba(0,0,0,0.5); transition: all 0.1s ease; outline: none; }
+        .btn-gacha-girar:active { transform: translateY(8px) rotate(45deg); box-shadow: 0 0 0 #990033, 0 5px 5px rgba(0,0,0,0.5); }
+        
+        .gacha-panel-inferior { display: flex; width: 100%; justify-content: space-around; align-items: flex-end; margin-top: 15px; }
+        .gacha-moneda { width: 25px; height: 40px; background: #silver; border: 2px solid #555; background: linear-gradient(to right, #999, #eee, #999); border-radius: 5px; position: relative;}
+        .gacha-moneda::after { content: ''; position: absolute; top: 10px; left: 10px; width: 5px; height: 20px; background: #222; }
+        
+        .gacha-salida { width: 90px; height: 70px; background: #111; border: 4px solid #444; border-radius: 10px 10px 0 0; box-shadow: inset 0 15px 20px rgba(0,0,0,0.9); position: relative; }
+        
+        .capsula { width: 50px; height: 50px; position: absolute; left: 15px; top: -60px; opacity: 0; z-index: 20;}
+        .capsula-top { width: 50px; height: 25px; background: #00e6ff; border-radius: 25px 25px 0 0; box-shadow: inset -5px 0 10px rgba(0,0,0,0.3); border: 2px solid #222; border-bottom: none; transition: transform 0.5s ease;}
+        .capsula-bottom { width: 50px; height: 25px; background: #fff; border-radius: 0 0 25px 25px; box-shadow: inset -5px -5px 10px rgba(0,0,0,0.3); border: 2px solid #222; border-top: 2px solid #222;}
+        
+        @keyframes caerCapsula { 0% { top: -60px; opacity: 0; transform: rotate(0deg) scale(0.5); } 30% { top: 35px; opacity: 1; transform: rotate(45deg) scale(1); } 50% { top: 15px; transform: rotate(90deg); } 70% { top: 35px; transform: rotate(135deg); } 100% { top: 35px; opacity: 1; transform: rotate(180deg); } }
+
+        .ticket-premio { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0); background: linear-gradient(135deg, #ffe6f0 0%, #ffccdc 100%); border: 2px dashed #ff1a75; border-radius: 10px; padding: 25px 20px; color: #990033; font-family: 'Press Start 2P', cursive; font-size: 0.65rem; text-align: center; width: 260px; box-shadow: 0 0 30px rgba(255, 26, 117, 0.8); z-index: 100; transition: transform 0.5s cubic-bezier(0.17, 0.89, 0.32, 1.4); }
+
+        /* REGALO 5 (ROMPECABEZAS) */
+        #puzzle-grid { display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(5, 1fr); width: 90%; max-width: 800px; aspect-ratio: 8 / 5; gap: 1px; background: #222; border: 4px solid #fff; box-shadow: 0 0 20px rgba(0,0,0,0.8); margin: 0 auto; }
+        .puzzle-piece { width: 100%; height: 100%; background-image: url('rc.png'); background-size: 800% 500%; cursor: grab; border: 1px solid rgba(255,255,255,0.2); }
+        .puzzle-piece:active { cursor: grabbing; opacity: 0.8; z-index: 10; }
+
+        /* REGALO 6 (ÁRBOL CREMITA) */
+        #regalo-6 { background-color: #FAF0E6 !important; }
+        .rama-svg { stroke-dasharray: 1000; stroke-dashoffset: 1000; transition: stroke-dashoffset 4s ease-in-out; }
+        .dibujar .rama-svg { stroke-dashoffset: 0; }
+
+        /* REGALO 7 (CORAZÓN ESPACIAL BRILLANTE) */
+        #regalo-7 { background: radial-gradient(ellipse at center, #050510 0%, #000000 100%); }
+        #canvas-corazon { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .titulo-i-love-you { position: absolute; top: 12%; width: 100%; text-align: center; color: #00e6ff; font-family: 'Dancing Script', cursive; font-size: 5rem; text-shadow: 0 0 25px #00e6ff, 0 0 40px #00aacc; opacity: 0; transition: opacity 2s ease; z-index: 10; pointer-events: none;}
+    </style>
+</head>
+<body>
+
+    <canvas id="matrix-canvas"></canvas>
+    <div id="pantalla-conteo" class="pantalla"><div id="texto-conteo" class="texto-gigante"></div></div>
+    <div id="pantalla-mensaje" class="pantalla"><div id="texto-mensaje" class="texto-gigante"></div></div>
+
+    <div id="pantalla-carga" class="pantalla">
+        <div id="texto-carga" class="texto-chico" style="font-size: 1.5rem; margin-top: 0;">Preparando magia...</div>
+        <div id="porcentaje">0%</div>
+        <div id="msj-listo" class="texto-chico" style="display: none; color: #fff; z-index: 10;">BUENOS DÍAS MI AMOR, SOLO PARA USTED ❤</div>
+        <button id="btn-magia" class="btn-retro btn-magia" onclick="detonarExplosion()">Click aquí</button>
+        <div id="contenedor-explosion"></div>
+    </div>
+
+    <div id="pantalla-menu" class="pantalla">
+        <h1 class="texto-gigante" style="color: white; font-size: 2.5rem; text-shadow: 4px 4px 0px #000;">FELIZ<br>CUMPLEAÑOS MI<br>VIDA</h1>
+        <p class="texto-chico" style="text-shadow: 2px 2px 0px #000;">¿quieres ver tu regalo?</p>
+        <div class="botones-container">
+            <button class="btn-retro" onclick="aceptarRegalo()">EMPEZAR</button>
+            <button id="btn-troll" class="btn-retro" onmouseover="esquivarBoton()" onclick="irAPantalla('pantalla-broma')">DENEGAR</button>
+        </div>
+    </div>
+
+    <div id="pantalla-sabia" class="pantalla">
+        <h1 class="texto-gigante" style="color: #ff4d94; font-size: 1.8rem; line-height: 2;">Sabía que<br>dirías que sí<br><br><span style="color: white;">( ^ _ ~ )</span></h1>
+    </div>
+
+    <div id="pantalla-broma" class="pantalla">
+        <img src="gato_triste.png" alt="Gatito llorando" class="img-gatito"> 
+        <h1 class="texto-gigante" style="color: #4db8ff; font-size: 2rem;">VA PORFI,<br>INTÉNTALO...</h1>
+        <div class="botones-container"><button class="btn-retro" onclick="aceptarRegalo()">ESTÁ BIEN...</button></div>
+    </div>
+
+    <div id="pantalla-regalos" class="pantalla">
+        <div id="fondo-estrellas-menu"></div>
+        <h1 class="texto-gigante" style="color: white; font-size: 1.5rem; z-index: 2;">SELECCIONA UN REGALO</h1>
+        <div class="grid-regalos">
+            <button class="btn-retro btn-regalo" onclick="abrirRegalo('regalo-1')"><span class="icono-regalo">💌</span> 1. LA CARTA</button>
+            <button class="btn-retro btn-regalo" onclick="abrirRegalo('regalo-2')"><span class="icono-regalo">🎵</span> 2. PLAYLIST</button>
+            <button class="btn-retro btn-regalo" onclick="abrirRegalo('regalo-3')"><span class="icono-regalo">🔴</span> 3. POKÉMON</button>
+            <button class="btn-retro btn-regalo" onclick="abrirRegalo('regalo-4')"><span class="icono-regalo">🎟️</span> 4. TICKETS</button>
+            <button class="btn-retro btn-regalo" onclick="abrirRegalo('regalo-5')"><span class="icono-regalo">🧩</span> 5. ROMPECABEZAS</button>
+            <button class="btn-retro btn-regalo" onclick="abrirRegalo('regalo-6')"><span class="icono-regalo">🌳</span> 6. EL ÁRBOL</button>
+            <button class="btn-retro btn-regalo btn-especial" onclick="abrirRegalo('regalo-7')"><span class="icono-regalo">✨</span> 7. CORAZÓN ESTELAR</button>
+        </div>
+    </div>
+
+    <!-- REGALO 1: LA CARTA -->
+    <div id="regalo-1" class="pantalla pantalla-regalo-abierto">
+        <button class="btn-retro btn-volver" onclick="irAPantalla('pantalla-regalos')">Volver</button>
+        <div class="carta-contenedor">
+            <h2 style="font-family: 'Press Start 2P', cursive; font-size: 1rem; color: #ff4d94; text-align: center;">Para mi hermosa Luz</h2>
+            <p>Feliz cumpleaños, mi vida.</p>
+            <p>Han pasado ya más de cinco años desde aquella mañana de mayo en la que empezamos este viaje. Si miro hacia atrás, no te voy a mentir, sé que el camino no siempre ha sido fácil. Hemos atravesado momentos muy difíciles, obstáculos y días pesados que nos han puesto a prueba... pero mírame, aquí sigo y no planeo irme a ningún lado.</p>
+            <p>Si de algo estoy seguro es de que vales cada esfuerzo, cada desvelo y cada sacrificio. Todo lo que hago hoy, mi esfuerzo de todos los días y mis ganas de superarme, tienen un solo objetivo: salir adelante, conseguir el dinero y la estabilidad que necesitamos para que podamos estar juntos siempre, construir nuestra vida y darte todo lo que te mereces.</p>
+            <p>Gracias por no soltarme la mano en las dificultades. Que este sea solo uno de los muchísimos cumpleaños que celebremos juntos. Te amo con toda mi alma.</p>
+            <p style="text-align: right; margin-top: 20px; font-weight: bold;">Con todo mi amor, Alexis ❤️</p>
+        </div>
+    </div>
+
+    <!-- REGALO 2: PLAYLIST YOUTUBE -->
+    <div id="regalo-2" class="pantalla pantalla-regalo-abierto">
+        <button class="btn-retro btn-volver" onclick="irAPantalla('pantalla-regalos'); detenerIframes();">Volver</button>
+        <h1 class="texto-gigante" style="font-size: 1.2rem; margin-top: 60px; margin-bottom: 20px;">Nuestra Música</h1>
+        
+        <div style="width: 90%; max-width: 1000px; height: 75vh; overflow-y: auto;">
+            <div class="yt-grid">
+                <div class="yt-item">
+                    <iframe width="100%" height="160" src="https://www.youtube.com/embed/oXzTIN7ZfOM" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
+                    <p>"Esta canción me recuerda al momento exacto en que supe que eras tú."</p>
+                </div>
+                <div class="yt-item" style="border-color: #ff4d94;">
+                    <iframe width="100%" height="160" src="https://www.youtube.com/embed/1_C444yvMIM" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
+                    <p style="color: #00e6ff;">"Para esos días donde las palabras no alcanzan para decirte cuánto te amo."</p>
+                </div>
+                <div class="yt-item">
+                    <iframe width="100%" height="160" src="https://www.youtube.com/embed/s1PdJmC5aD0" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
+                    <p>"El ritmo exacto de cómo late mi corazón cuando te veo sonreír."</p>
+                </div>
+                <div class="yt-item" style="border-color: #ff4d94;">
+                    <iframe width="100%" height="160" src="https://www.youtube.com/embed/2Vv-BfVoq4g" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
+                    <p style="color: #00e6ff;">"Nuestra banda sonora para cuando conquistemos el mundo juntos."</p>
+                </div>
+                <div class="yt-item">
+                    <iframe width="100%" height="160" src="https://www.youtube.com/embed/yKNxeF4KMsY" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
+                    <p>"Una melodía que abraza el alma, justo como tú lo haces conmigo."</p>
+                </div>
+                <div class="yt-item" style="border-color: #ff4d94;">
+                    <iframe width="100%" height="160" src="https://www.youtube.com/embed/V48Fw4e18-k" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
+                    <p style="color: #00e6ff;">"Si mi amor por ti fuera una canción, sonaría exactamente así."</p>
+                </div>
+                <div class="yt-item">
+                    <iframe width="100%" height="160" src="https://www.youtube.com/embed/O0E53-Uls-Y" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
+                    <p>"Para que la escuches en las mañanas y recuerdes que eres mi primer pensamiento."</p>
+                </div>
+                <div class="yt-item" style="border-color: #ff4d94;">
+                    <iframe width="100%" height="160" src="https://www.youtube.com/embed/IKzO-_T9bA" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
+                    <p style="color: #00e6ff;">"Esa canción que me hace querer bailar contigo en medio de la sala."</p>
+                </div>
+                <div class="yt-item">
+                    <iframe width="100%" height="160" src="https://www.youtube.com/embed/mS1a7J6yUWY" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
+                    <p>"Un recordatorio de que siempre estaré aquí, en los días buenos y en los malos."</p>
+                </div>
+                <div class="yt-item" style="border-color: #ff4d94;">
+                    <iframe width="100%" height="160" src="https://www.youtube.com/embed/Y8hK5C1D4yY" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
+                    <p style="color: #00e6ff;">"La letra perfecta para explicar por qué eres mi paz y mi refugio."</p>
+                </div>
+                <div class="yt-item">
+                    <iframe width="100%" height="160" src="https://www.youtube.com/embed/L4H2E4xN3b0" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
+                    <p>"Para cerrar los ojos, escucharla y sentir que te abrazo a la distancia."</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- REGALO 3: POKÉMON -->
+    <div id="regalo-3" class="pantalla" style="z-index: 20; overflow: hidden;">
+        <div id="poke-fondo-animado"></div>
+        <button class="btn-retro btn-volver" style="color: #333; border-color: #333; z-index: 10;" onclick="irAPantalla('pantalla-regalos')">Volver</button>
+        <h1 class="texto-gigante" style="font-size: 1.3rem; text-shadow: 2px 2px 0px #000; color: #fff; margin-top: 40px; margin-bottom: 20px; z-index: 10; padding: 0 15px;">Una de estas pokéballs contiene tu regalo.<br>¡Atrápala si puedes!</h1>
+        
+        <div style="width: 100%; display: flex; justify-content: center; align-items: center; flex-grow: 1; padding-bottom: 30px;">
+            <div id="poke-campo"></div>
+        </div>
+
+        <div id="poke-modal" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(0,0,0,0.85); padding:30px; text-align:center; border: 4px solid #fff; border-radius: 10px; z-index: 100; min-width: 320px;">
+            <h2 id="poke-titulo" style="color:#ffcc00; font-size: 1.5rem; margin-bottom: 15px;">¡OH NO!</h2>
+            <p id="poke-msj" style="color:#fff; font-size: 0.9rem; font-family: 'Press Start 2P', cursive;"></p>
+            <img id="poke-img" src="futuro.png" onerror="this.src='https://placehold.co/200/ff4d94/FFF?text=FUTURO.PNG'" style="display:none; width: 200px; margin: 15px auto; border: 4px solid #fff; border-radius: 8px;">
+            <br>
+            <button class="btn-retro" style="margin-top: 15px;" onclick="cerrarPokeModal()">SEGUIR BUSCANDO</button>
+        </div>
+    </div>
+
+    <!-- REGALO 4: MÁQUINA DE TICKETS REALISTA -->
+    <div id="regalo-4" class="pantalla pantalla-regalo-abierto">
+        <button class="btn-retro btn-volver" onclick="irAPantalla('pantalla-regalos')">Volver</button>
+        <h1 class="texto-gigante" style="font-size: 1.3rem; margin-top: 20px; margin-bottom: 10px;">Sorpresa del Día</h1>
+        <p id="gacha-info" class="texto-chico" style="margin-top: 0; font-size: 0.7rem; color: #ffb3d9;"></p>
+        
+        <div id="gacha-container">
+            <div class="gacha-cabeza">
+                <div id="bolitas-internas"></div>
+            </div>
+            <div class="gacha-cuerpo">
+                <button class="btn-gacha-girar" onclick="girarGacha()">GIRAR</button>
+                <div class="gacha-panel-inferior">
+                    <div class="gacha-moneda"></div>
+                    <div class="gacha-salida">
+                        <div id="bola-premio" class="capsula">
+                            <div id="capsula-arriba" class="capsula-top"></div>
+                            <div class="capsula-bottom"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="ticket-revelado" class="ticket-premio">
+            <div class="ticket-header" style="font-size: 0.9rem; color: #ff1a75; margin-bottom: 15px;">TICKET ESPECIAL</div>
+            <div id="ticket-texto" style="font-size: 0.8rem; line-height: 1.8;"></div>
+            <button class="btn-retro" style="margin-top: 20px; font-size: 0.5rem; padding: 10px;" onclick="cerrarTicket()">GUARDAR</button>
+        </div>
+    </div>
+
+    <!-- REGALO 5: ROMPECABEZAS (ACTUALIZADO CON premio.mp4) -->
+    <div id="regalo-5" class="pantalla pantalla-regalo-abierto">
+        <button class="btn-retro btn-volver" onclick="irAPantalla('pantalla-regalos')">Volver</button>
+        <h1 class="texto-gigante" style="font-size: 1.2rem; margin-top: 40px; margin-bottom: 20px;">Arma nuestro recuerdo</h1>
+        
+        <div id="puzzle-grid"></div>
+        <video id="puzzle-video" src="premio.mp4" style="display: none; width: 90%; max-width: 800px; border: 4px solid #fff; border-radius: 10px; box-shadow: 0 0 20px #ff4d94;" controls></video>
+
+        <div id="puzzle-modal" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(0,0,0,0.9); padding:30px; text-align:center; border: 4px solid #ff4d94; border-radius: 10px; z-index: 100; min-width: 300px;">
+            <h2 style="color:#ffcc00; font-size: 1.2rem; margin-bottom: 15px; line-height: 1.5;">Felicidades, yo sabía que podrías y que cada vez avanzas más y eres más lista.</h2>
+            <button class="btn-retro" style="margin-top: 15px;" onclick="cerrarPuzzleYVerVideo()">VER SORPRESA</button>
+        </div>
+    </div>
+    
+    <!-- REGALO 6: EL ÁRBOL -->
+    <div id="regalo-6" class="pantalla" style="z-index: 20; color: #333; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+        <button class="btn-retro btn-volver" style="color: #333; border-color: #333; z-index: 50;" onclick="irAPantalla('pantalla-regalos')">Volver</button>
+        
+        <div style="position: relative; width: 90%; max-width: 900px; height: 100%; display: flex; align-items: center; justify-content: center;">
+            <div id="zona-texto" style="position: absolute; left: 2%; width: 48%; opacity: 0; transition: opacity 1.5s ease; text-align: left; padding-top: 50px;">
+                <div style="font-family: 'Press Start 2P', cursive; font-size: 0.8rem; margin-bottom: 25px; color: #666; line-height: 1.4;">Flores de cerezo para el amor de mi vida:</div>
+                <div id="texto-poema" style="font-family: 'Dancing Script', cursive; font-size: 1.8rem; line-height: 1.6; color: #4a4a4a; min-height: 150px; font-weight: 700;"></div>
+                <hr style="border: none; border-top: 2px solid #333; margin: 30px 0 15px 0;">
+                <div style="font-family: 'Courier New', Courier, monospace; font-size: 0.9rem; color: #888; font-weight: bold; margin-bottom: 5px;">Nuestro tiempo juntos:</div>
+                <div id="contador-tiempo" style="font-size: 1.1rem; color: #4a4a4a; font-family: 'Courier New', Courier, monospace; font-weight: bold;"></div>
+            </div>
+
+            <div id="zona-arbol" style="position: absolute; left: 50%; bottom: 10%; transform: translateX(-50%); width: 350px; height: 450px; transition: all 2.5s cubic-bezier(0.4, 0, 0.2, 1); display: flex; justify-content: center;">
+                <div style="position: absolute; bottom: 0; width: 150%; left: -25%; height: 3px; background-color: #333;"></div>
+                <div id="semilla-obj" onclick="crearMagiaArbol()" style="position: absolute; bottom: 0; cursor: pointer; text-align: center; transition: opacity 0.5s ease; z-index: 10;">
+                    <div style="width: 25px; height: 15px; background: #654321; border-radius: 50% 50% 0 0; margin: 0 auto;"></div>
+                    <div id="mensaje-semilla" style="font-size: 0.7rem; margin-top: 10px; color: #888; font-family: 'Press Start 2P', cursive; animation: latido 1.5s infinite alternate;">TÓCAME</div>
+                </div>
+                <svg id="tronco-svg" viewBox="0 0 200 300" style="position: absolute; bottom: 0; width: 250px; height: 350px; pointer-events: none;">
+                    <g fill="none" stroke="#6b4423" stroke-linecap="round" stroke-linejoin="round">
+                        <path class="rama-svg" d="M100,300 Q100,180 100,80" stroke-width="12" />
+                        <path class="rama-svg" d="M100,230 Q60,180 30,130" stroke-width="8" />
+                        <path class="rama-svg" d="M100,200 Q150,150 170,100" stroke-width="8" />
+                        <path class="rama-svg" d="M70,185 Q40,140 50,90" stroke-width="5" />
+                        <path class="rama-svg" d="M135,165 Q170,110 140,50" stroke-width="5" />
+                        <path class="rama-svg" d="M100,140 Q120,90 90,40" stroke-width="5" />
+                    </g>
+                </svg>
+                <div id="corazon-flores" style="position: absolute; top: 15px; width: 300px; height: 300px; pointer-events: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- REGALO 7: CORAZÓN AZUL -->
+    <div id="regalo-7" class="pantalla" style="z-index: 20; overflow: hidden;">
+        <button class="btn-retro btn-volver" style="background: rgba(255,255,255,0.1); color: #fff; border-color: #00e6ff; text-shadow: 0 0 5px #00e6ff;" onclick="irAPantalla('pantalla-regalos')">Volver</button>
+        <div id="titulo-particulas" class="titulo-i-love-you">I Love You</div>
+        <canvas id="canvas-corazon"></canvas>
+    </div>
+
+    <script>
+        function irAPantalla(idDestino) {
+            document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('visible'));
+            document.getElementById(idDestino).classList.add('visible');
+            if(idDestino === 'pantalla-regalos') generarEstrellas();
+            
+            if(idDestino === 'regalo-3') iniciarPokemon();
+            else detenerPokemon();
+
+            if(idDestino === 'regalo-4') prepararGacha();
+            if(idDestino === 'regalo-5') iniciarPuzzle(); 
+            if(idDestino === 'regalo-6') reiniciarArbol();
+
+            if(idDestino === 'regalo-7') iniciarCorazonParticulas();
+            else detenerCorazonParticulas(); 
+        }
+
+        // --- NUEVA LÓGICA PARA DETENER VIDEOS DE YOUTUBE ---
+        function detenerIframes() {
+            let iframes = document.querySelectorAll('#regalo-2 iframe');
+            iframes.forEach(iframe => {
+                let temp = iframe.src;
+                iframe.src = temp;
+            });
+        }
+
+        function generarEstrellas() {
+            const contenedor = document.getElementById('fondo-estrellas-menu');
+            if (contenedor.innerHTML !== '') return; 
+            for (let i = 0; i < 70; i++) {
+                let estrella = document.createElement('div');
+                estrella.classList.add('estrella');
+                let tamaño = Math.random() * 3 + 1;
+                estrella.style.width = tamaño + 'px'; estrella.style.height = tamaño + 'px';
+                estrella.style.top = Math.random() * 100 + '%'; estrella.style.left = Math.random() * 100 + '%';
+                estrella.style.animationDuration = (Math.random() * 1.5 + 0.5) + 's';
+                estrella.style.animationDelay = (Math.random() * 2) + 's';
+                contenedor.appendChild(estrella);
+            }
+        }
+
+        function esquivarBoton() {
+            const btn = document.getElementById('btn-troll');
+            let moveX = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 100 + 50);
+            let moveY = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 100 + 50);
+            btn.style.transform = `translate(${moveX}px, ${moveY}px)`;
+        }
+
+        function aceptarRegalo() {
+            irAPantalla('pantalla-sabia');
+            setTimeout(() => { irAPantalla('pantalla-regalos'); }, 3000); 
+        }
+
+        function abrirRegalo(idRegalo) { irAPantalla(idRegalo); }
+
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const letras = '0123456789'.split(''); const tamanoFuente = 16;
+        const columnas = canvas.width / tamanoFuente; const gotas = [];
+        for(let x = 0; x < columnas; x++) gotas[x] = 1;
+        
+        function dibujarMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#ff4d94'; ctx.font = tamanoFuente + 'px monospace';
+            for(let i = 0; i < gotas.length; i++) {
+                ctx.fillText(letras[Math.floor(Math.random() * letras.length)], i * tamanoFuente, gotas[i] * tamanoFuente);
+                if(gotas[i] * tamanoFuente > canvas.height && Math.random() > 0.975) gotas[i] = 0;
+                gotas[i]++;
+            }
+        }
+        setInterval(dibujarMatrix, 35);
+
+        setTimeout(() => { document.getElementById('pantalla-conteo').classList.add('visible'); document.getElementById('texto-conteo').innerText = '3'; }, 500);
+        setTimeout(() => { document.getElementById('texto-conteo').innerText = '2'; }, 1500);
+        setTimeout(() => { document.getElementById('texto-conteo').innerText = '1'; }, 2500);
+        setTimeout(() => { document.getElementById('pantalla-conteo').classList.remove('visible'); }, 3500);
+        setTimeout(() => { document.getElementById('pantalla-mensaje').classList.add('visible'); document.getElementById('texto-mensaje').innerText = 'HAPPY'; }, 4000);
+        setTimeout(() => { document.getElementById('texto-mensaje').innerText = 'BIRTHDAY'; }, 5000);
+        setTimeout(() => { document.getElementById('texto-mensaje').innerText = 'TO'; }, 6000);
+        setTimeout(() => { document.getElementById('texto-mensaje').innerText = 'LUZ'; }, 7000);
+        setTimeout(() => { document.getElementById('texto-mensaje').innerHTML = `<div class="corazon-gigante">❤</div><div class="texto-chico">Espero te guste, lo hice con amor</div>`; }, 8500);
+
+        setTimeout(() => { 
+            document.getElementById('pantalla-mensaje').classList.remove('visible'); 
+            document.getElementById('pantalla-carga').classList.add('visible');
+            let progreso = 0;
+            let intervalo = setInterval(() => {
+                progreso += Math.floor(Math.random() * 15) + 5;
+                if(progreso >= 100) {
+                    progreso = 100; clearInterval(intervalo);
+                    document.getElementById('porcentaje').style.display = 'none'; 
+                    document.getElementById('texto-carga').style.display = 'none';
+                    document.getElementById('msj-listo').style.display = 'block'; 
+                    document.getElementById('btn-magia').style.display = 'block';
+                }
+                document.getElementById('porcentaje').innerText = progreso + '%';
+            }, 300);
+        }, 12500);
+
+        const textosAmor = ["TE AMO", "ERES MI SOL", "PARA SIEMPRE", "MI VIDA", "TE AMO MUCHO"];
+        const misFotos = [];
+        for(let f = 1; f <= 10; f++) { misFotos.push(`foto_${f}.png`); }
+
+        function detonarExplosion() {
+            document.getElementById('btn-magia').style.display = 'none';
+            document.getElementById('msj-listo').style.display = 'none';
+            let w = window.innerWidth; let h = window.innerHeight;
+            let cont = document.getElementById('contenedor-explosion');
+            let cols = 9; let rows = 9; let cellW = w / cols; let cellH = h / rows;
+
+            for(let i = 0; i < 81; i++) {
+                let el = document.createElement('div');
+                let esTexto = Math.random() > 0.5;
+                el.classList.add('flotante');
+                if(esTexto) {
+                    el.classList.add('flotante-texto');
+                    el.innerText = textosAmor[Math.floor(Math.random() * textosAmor.length)];
+                } else {
+                    el.classList.add('flotante-img');
+                    el.innerHTML = `<img src="${misFotos[i % 10]}" onerror="this.src='https://placehold.co/100/ff4d94/FFF?text=FOTO'"/>`; 
+                }
+                cont.appendChild(el);
+                let col = i % cols; let row = Math.floor(i / cols);
+
+                setTimeout(() => {
+                    let posX = - (w/2) + (col * cellW) + (cellW/2) + ((Math.random() - 0.5) * cellW * 0.5);
+                    let posY = - (h/2) + (row * cellH) + (cellH/2) + ((Math.random() - 0.5) * cellH * 0.5);
+                    let rotacion = esTexto ? (Math.random() - 0.5) * 20 : (Math.random() - 0.5) * 360; 
+                    let tamaño = esTexto ? (Math.random() * 0.4 + 0.8) : (Math.random() * 0.5 + 0.5);
+                    el.style.transform = `translate(calc(-50% + ${posX}px), calc(-50% + ${posY}px)) scale(${tamaño}) rotate(${rotacion}deg)`;
+                    el.style.opacity = '1';
+                }, 50);
+            }
+            setTimeout(() => { document.getElementById('pantalla-carga').classList.remove('visible'); irAPantalla('pantalla-menu'); canvas.style.display = 'none'; }, 15000); 
+        }
+
+        // --- LÓGICA DEL REGALO 3 ---
+        let pokemonCorrecto = 0;
+        let intervaloMovimientoPoke;
+        let cantidadPokeballs = 12;
+
+        function ejecutarMovimientoPokemon() {
+            for(let i = 0; i < cantidadPokeballs; i++) {
+                let b = document.getElementById('bola-' + i);
+                if(b) {
+                    b.style.left = (Math.random() * 85) + '%';
+                    b.style.top = (Math.random() * 80) + '%';
+                }
+            }
+        }
+
+        function iniciarPokemon() {
+            let campo = document.getElementById('poke-campo');
+            campo.innerHTML = ''; 
+            pokemonCorrecto = Math.floor(Math.random() * cantidadPokeballs); 
+            for(let i = 0; i < cantidadPokeballs; i++) {
+                let contenedor = document.createElement('div');
+                contenedor.className = 'pokeball-container';
+                contenedor.id = 'bola-' + i;
+                contenedor.style.left = (Math.random() * 85) + '%';
+                contenedor.style.top = (Math.random() * 80) + '%';
+                let bola = document.createElement('div');
+                bola.className = 'pokeball';
+                contenedor.onmousedown = () => verificarPokeball(i);
+                contenedor.ontouchstart = () => verificarPokeball(i);
+                contenedor.appendChild(bola);
+                campo.appendChild(contenedor);
+            }
+            setTimeout(ejecutarMovimientoPokemon, 50);
+            intervaloMovimientoPoke = setInterval(ejecutarMovimientoPokemon, 4000);
+        }
+
+        function detenerPokemon() {
+            if(intervaloMovimientoPoke) clearInterval(intervaloMovimientoPoke);
+        }
+
+        function verificarPokeball(indice) {
+            let modal = document.getElementById('poke-modal');
+            let titulo = document.getElementById('poke-titulo');
+            let msj = document.getElementById('poke-msj');
+            let img = document.getElementById('poke-img');
+            let btn = modal.querySelector('button');
+
+            modal.style.display = 'block';
+            if(indice === pokemonCorrecto) {
+                titulo.innerText = "¡FELICIDADES!"; titulo.style.color = "#4caf50";
+                msj.innerHTML = "Te escojo a ti...<br><br><span style='font-size: 0.65rem; color: #ffccdc; font-family: \"Courier New\", monospace; font-weight: bold; line-height: 1.6;'>Y siempre, sin importar qué pase, tú eres nuestro futuro. 💖<br>No nos falles, porque juntos somos invencibles ✨🚀</span>";
+                img.style.display = "block"; btn.innerText = "CERRAR"; detenerPokemon(); 
+            } else {
+                titulo.innerText = "¡OH NO!"; titulo.style.color = "#ff3333";
+                msj.innerHTML = "Pokéball incorrecta.<br>¡Se escapó! Vuelve a intentarlo...";
+                img.style.display = "none"; btn.innerText = "SEGUIR BUSCANDO";
+            }
+        }
+
+        function cerrarPokeModal() { document.getElementById('poke-modal').style.display = 'none'; }
+
+        // --- LÓGICA DEL REGALO 4 ---
+        const premiosGacha = [
+            "Vale por un<br><br>MASAJE RELAJANTE DE 30 MINUTOS", "Vale por una<br><br>CENA ROMÁNTICA DONDE TÚ ELIJAS",
+            "Vale por un<br><br>BESO APASIONADO AL INSTANTE", "Vale por una<br><br>NOCHE DE PELÍCULAS Y PALOMITAS",
+            "Vale por<br><br>TU POSTRE FAVORITO SIN PREGUNTAR", "Vale por<br><br>GANAR UNA DISCUSIÓN (TÚ TIENES LA RAZÓN)",
+            "Vale por un<br><br>DÍA COMPLETO SIN HACER NADA", "Vale por un<br><br>VIAJE IMPROVISADO FIN DE SEMANA",
+            "Vale por un<br><br>DESAYUNO EN LA CAMA HECHO POR MÍ", "Vale por un<br><br>ABRAZO INFINITO CUANDO LO NECESITES",
+            "Vale por<br><br>UNA SALIDA POR HELADOS DOBLES", "Vale por<br><br>UNA NOCHE DE VIDEOJUEGOS O JUEGOS DE MESA",
+            "Vale por<br><br>QUE YO LAVE LOS TRASTES HOY", "Vale por<br><br>UN MASAJE EN LOS PIES",
+            "Vale por<br><br>COMPRARTE ESE CAPRICHO QUE QUERÍAS"
+        ];
+        
+        let diasRestantesMes = 0; let maquinaGirando = false;
+
+        function prepararGacha() {
+            const hoy = new Date(); const ultimoDia = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate();
+            diasRestantesMes = ultimoDia - hoy.getDate() + 1; 
+            document.getElementById('gacha-info').innerText = `Faltan ${diasRestantesMes} días para terminar el mes. Tienes ${diasRestantesMes} cápsulas esperando, pero solo puedes abrir 1 por día.`;
+            
+            let domoIn = document.getElementById('bolitas-internas'); domoIn.innerHTML = '';
+            const coloresBola = ['#ffcc00', '#00e6ff', '#4caf50', '#ff4d4d', '#ff66b2', '#9933ff'];
+            for(let i=0; i<18; i++) {
+                let bola = document.createElement('div'); bola.className = 'bola-interna';
+                bola.style.width = '35px'; bola.style.height = '35px';
+                bola.style.background = coloresBola[Math.floor(Math.random() * coloresBola.length)];
+                bola.style.left = (Math.random() * 180 + 10) + 'px'; bola.style.bottom = (Math.random() * 100 + 10) + 'px';
+                domoIn.appendChild(bola);
+            }
+            maquinaGirando = false; document.getElementById('bola-premio').style.animation = 'none';
+            document.getElementById('bola-premio').style.opacity = '0'; document.getElementById('capsula-arriba').style.transform = 'translateY(0)';
+            document.getElementById('ticket-revelado').style.transform = 'translate(-50%, -50%) scale(0)';
+        }
+
+        function girarGacha() {
+            if(maquinaGirando) return;
+            const hoyStr = new Date().toDateString();
+            const ultimoSacado = localStorage.getItem('luz_ultimo_ticket_fecha');
+            let indexActual = parseInt(localStorage.getItem('luz_ticket_index') || '0');
+            
+            if (ultimoSacado === hoyStr) {
+                alert("¡Ya sacaste tu cápsula de hoy, mi amor! Vuelve mañana para otra sorpresa. ❤️"); return;
+            }
+            maquinaGirando = true;
+            let bolitas = document.querySelectorAll('.bola-interna');
+            bolitas.forEach(b => { b.style.animation = `agitarLoco ${0.15 + Math.random() * 0.15}s infinite alternate`; });
+
+            setTimeout(() => {
+                bolitas.forEach(b => b.style.animation = 'none'); 
+                let bola = document.getElementById('bola-premio');
+                bola.style.animation = 'caerCapsula 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards';
+
+                setTimeout(() => {
+                    document.getElementById('capsula-arriba').style.transform = 'translateY(-20px) rotate(15deg)';
+                    setTimeout(() => {
+                        let ticket = document.getElementById('ticket-revelado');
+                        let premioSeleccionado = premiosGacha[indexActual % premiosGacha.length];
+                        document.getElementById('ticket-texto').innerHTML = premioSeleccionado;
+                        ticket.style.transform = 'translate(-50%, -50%) scale(1)';
+                        localStorage.setItem('luz_ultimo_ticket_fecha', hoyStr);
+                        localStorage.setItem('luz_ticket_index', indexActual + 1);
+                        maquinaGirando = false;
+                    }, 400);
+                }, 1500);
+            }, 1500); 
+        }
+
+        function cerrarTicket() {
+            document.getElementById('ticket-revelado').style.transform = 'translate(-50%, -50%) scale(0)';
+            document.getElementById('bola-premio').style.opacity = '0';
+            document.getElementById('bola-premio').style.animation = 'none';
+            document.getElementById('capsula-arriba').style.transform = 'translateY(0)';
+        }
+
+        // --- LÓGICA DEL REGALO 5 ---
+        let piezaArrastrada = null;
+        
+        function iniciarPuzzle() {
+            let grid = document.getElementById('puzzle-grid');
+            grid.innerHTML = ''; document.getElementById('puzzle-video').style.display = 'none'; grid.style.display = 'grid';
+            
+            let indices = Array.from({length: 40}, (_, i) => i);
+            indices.sort(() => Math.random() - 0.5); 
+
+            indices.forEach(idx => {
+                let p = document.createElement('div');
+                p.className = 'puzzle-piece'; p.draggable = true; p.dataset.idCorrecto = idx; 
+                let col = idx % 8; let fila = Math.floor(idx / 8);
+                p.style.backgroundPosition = `${(col / 7) * 100}% ${(fila / 4) * 100}%`;
+                
+                p.addEventListener('dragstart', function() { piezaArrastrada = this; });
+                p.addEventListener('dragover', function(e) { e.preventDefault(); }); 
+                p.addEventListener('drop', function() {
+                    if(piezaArrastrada && piezaArrastrada !== this) {
+                        let tempBg = piezaArrastrada.style.backgroundPosition;
+                        let tempId = piezaArrastrada.dataset.idCorrecto;
+                        piezaArrastrada.style.backgroundPosition = this.style.backgroundPosition;
+                        piezaArrastrada.dataset.idCorrecto = this.dataset.idCorrecto;
+                        this.style.backgroundPosition = tempBg;
+                        this.dataset.idCorrecto = tempId;
+                        verificarPuzzle(); 
+                    }
+                });
+                grid.appendChild(p);
+            });
+        }
+
+        function verificarPuzzle() {
+            let piezas = document.querySelectorAll('.puzzle-piece');
+            let gano = true;
+            piezas.forEach((p, index) => { if(parseInt(p.dataset.idCorrecto) !== index) gano = false; });
+            if(gano) { document.getElementById('puzzle-modal').style.display = 'block'; }
+        }
+
+        function cerrarPuzzleYVerVideo() {
+            document.getElementById('puzzle-modal').style.display = 'none';
+            document.getElementById('puzzle-grid').style.display = 'none';
+            let vid = document.getElementById('puzzle-video');
+            vid.style.display = 'block'; vid.play(); 
+        }
+
+        // --- LÓGICA DEL REGALO 6 ---
+        const fechaInicioRelacion = new Date("May 25, 2021 09:15:00").getTime();
+        let intervaloContador; let lluviaPetalos; let arbolEstaCreciendo = false;
+        const lineasPoema = [
+            "Todo empezó como una pequeña semilla,", "un 25 de mayo a las 9:15 de la mañana.",
+            "Para crecer necesitaba tiempo, paciencia y, sobre todo... Luz.", "A tu lado echó raíces en lo más profundo,",
+            "y hoy florece más fuerte cada día.", "Cada pétalo es un recuerdo, cada rama un momento contigo.",
+            "Eres mi paz, mi refugio y el amor de mi vida."
+        ];
+
+        function generarPuntosCorazonRealRelleno(cantidad) {
+            let puntos = [];
+            for (let i = 0; i < cantidad; i++) {
+                let t = Math.random() * Math.PI * 2; let r = Math.sqrt(Math.random()); 
+                let x = 16 * Math.pow(Math.sin(t), 3) * r;
+                let y = (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t)) * r;
+                let ruidoX = (Math.random() - 0.5) * 3; let ruidoY = (Math.random() - 0.5) * 3;
+                puntos.push({x: x + ruidoX, y: y + ruidoY});
+            }
+            return puntos.sort(() => Math.random() - 0.5); 
+        }
+
+        function reiniciarArbol() {
+            arbolEstaCreciendo = false;
+            document.getElementById('semilla-obj').style.opacity = '1'; document.getElementById('tronco-svg').classList.remove('dibujar');
+            document.getElementById('corazon-flores').innerHTML = ''; 
+            
+            let zonaArbol = document.getElementById('zona-arbol'); zonaArbol.style.left = '50%'; zonaArbol.style.transform = 'translateX(-50%)';
+            let zonaTexto = document.getElementById('zona-texto'); zonaTexto.style.opacity = '0'; 
+            document.getElementById('texto-poema').innerHTML = ''; document.getElementById('contador-tiempo').innerHTML = '';
+            
+            if(intervaloContador) clearInterval(intervaloContador);
+            if(lluviaPetalos) clearInterval(lluviaPetalos);
+            if(window.intervaloPoema) clearInterval(window.intervaloPoema);
+        }
+
+        function actualizarContador() {
+            const ahora = new Date().getTime(); const diferencia = ahora - fechaInicioRelacion;
+            const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+            const horas = Math.floor((diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutos = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60));
+            const segundos = Math.floor((diferencia % (1000 * 60)) / 1000);
+            document.getElementById("contador-tiempo").innerHTML = `${dias} días ${horas} horas ${minutos} minutos ${segundos} segundos`;
+        }
+
+        function crearMagiaArbol() {
+            if (arbolEstaCreciendo) return;
+            arbolEstaCreciendo = true;
+            document.getElementById("semilla-obj").style.opacity = "0"; document.getElementById("tronco-svg").classList.add("dibujar");
+
+            setTimeout(() => {
+                let contenedorCorazon = document.getElementById("corazon-flores");
+                let puntos = generarPuntosCorazonRealRelleno(320); 
+                
+                puntos.forEach((p, index) => {
+                    setTimeout(() => {
+                        let flor = document.createElement("div"); flor.innerText = "🌸";
+                        flor.style.position = "absolute"; flor.style.fontSize = (Math.random() * 14 + 18) + "px"; 
+                        let px = (p.x * 10) + 150 - 15; let py = -(p.y * 10) + 160 - 15; 
+                        flor.style.left = px + "px"; flor.style.top = py + "px";
+                        flor.style.transform = "scale(0) rotate(" + (Math.random() * 360) + "deg)";
+                        flor.style.transition = "transform 1s cubic-bezier(0.17, 0.89, 0.32, 1.2)";
+                        contenedorCorazon.appendChild(flor);
+                        requestAnimationFrame(() => { flor.style.transform = "scale(1) rotate(" + (Math.random() * 360) + "deg)"; });
+                    }, index * 40); 
+                });
+
+                setTimeout(() => {
+                    let zonaArbol = document.getElementById('zona-arbol'); zonaArbol.style.left = '75%'; zonaArbol.style.transform = 'translateX(-50%)';
+                    setTimeout(() => {
+                        document.getElementById('zona-texto').style.opacity = '1';
+                        actualizarContador(); intervaloContador = setInterval(actualizarContador, 1000);
+                        escribirPoemaMagico(); lluviaPetalos = setInterval(caerPetalo, 600); 
+                    }, 1200);
+                }, puntos.length * 40 + 1000);
+            }, 3000); 
+        }
+
+        function escribirPoemaMagico() {
+            let lineaActual = 0; let contenedorPoema = document.getElementById("texto-poema"); contenedorPoema.innerHTML = "";
+            window.intervaloPoema = setInterval(() => {
+                if (lineaActual < lineasPoema.length) {
+                    let p = document.createElement("div"); p.style.opacity = "0"; p.style.transition = "opacity 0.8s ease";
+                    p.innerText = lineasPoema[lineaActual]; contenedorPoema.appendChild(p);
+                    requestAnimationFrame(() => p.style.opacity = "1"); lineaActual++;
+                } else { clearInterval(window.intervaloPoema); }
+            }, 1800); 
+        }
+
+        function caerPetalo() {
+            if (!document.getElementById("regalo-6").classList.contains("visible")) return;
+            let arbol = document.getElementById("zona-arbol");
+            let petalo = document.createElement("div"); petalo.innerText = "🌸"; petalo.style.position = "absolute";
+            petalo.style.left = (Math.random() * 250 + 20) + "px"; petalo.style.top = (Math.random() * 150 + 20) + "px";
+            petalo.style.fontSize = (Math.random() * 10 + 10) + "px"; petalo.style.opacity = "0.8"; petalo.style.pointerEvents = "none";
+            petalo.style.transition = "all 5s linear"; arbol.appendChild(petalo);
+            requestAnimationFrame(() => {
+                petalo.style.top = "450px"; petalo.style.left = (parseFloat(petalo.style.left) + (Math.random() * 100 - 50)) + "px"; 
+                petalo.style.opacity = "0"; petalo.style.transform = "rotate(" + (Math.random() * 360) + "deg)";
+            });
+            setTimeout(() => { if (petalo.parentNode) petalo.remove(); }, 5000);
+        }
+
+        // --- LÓGICA DEL REGALO 7 ---
+        let cCorazon = document.getElementById("canvas-corazon"); let ctxCorazon = cCorazon.getContext("2d");
+        let particulas = []; let animacionCorazonID; let mouse = { x: null, y: null, radius: 100 };
+        window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+        window.addEventListener('touchmove', (e) => { mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; });
+
+        class Particula {
+            constructor(x, y) {
+                this.x = Math.random() * cCorazon.width; this.y = Math.random() * cCorazon.height;
+                this.baseX = x; this.baseY = y; this.size = Math.random() * 1.5 + 0.5; this.density = (Math.random() * 30) + 1;
+            }
+            dibujar() {
+                ctxCorazon.fillStyle = '#00e6ff'; ctxCorazon.beginPath(); ctxCorazon.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctxCorazon.closePath(); ctxCorazon.fill();
+            }
+            actualizar() {
+                let dx = mouse.x - this.x; let dy = mouse.y - this.y; let distance = Math.sqrt(dx * dx + dy * dy);
+                let force = (mouse.radius - distance) / mouse.radius; let dirX = (dx / distance) * force * this.density; let dirY = (dy / distance) * force * this.density;
+                if (distance < mouse.radius) { this.x -= dirX; this.y -= dirY; } else {
+                    if (this.x !== this.baseX) this.x -= (this.x - this.baseX) / 15;
+                    if (this.y !== this.baseY) this.y -= (this.y - this.baseY) / 15;
+                }
+                this.dibujar();
+            }
+        }
+
+        function iniciarCorazonParticulas() {
+            cCorazon.width = window.innerWidth; cCorazon.height = window.innerHeight; particulas = [];
+            setTimeout(() => { document.getElementById('titulo-particulas').style.opacity = '1'; }, 1000);
+            let cantidad = 1500; 
+            for (let i = 0; i < cantidad; i++) {
+                let t = Math.random() * Math.PI * 2; let r = Math.sqrt(Math.random());
+                let x = 16 * Math.pow(Math.sin(t), 3) * r; let y = (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t)) * r;
+                let scale = Math.min(cCorazon.width, cCorazon.height) / 40;
+                let px = (x * scale) + (cCorazon.width / 2); let py = -(y * scale) + (cCorazon.height / 2) + 20;
+                let ruidoX = (Math.random() - 0.5) * 20; let ruidoY = (Math.random() - 0.5) * 20;
+                particulas.push(new Particula(px + ruidoX, py + ruidoY));
+            }
+            animarParticulas();
+        }
+
+        function animarParticulas() {
+            ctxCorazon.globalCompositeOperation = 'source-over'; ctxCorazon.fillStyle = 'rgba(5, 5, 12, 0.4)'; ctxCorazon.fillRect(0, 0, cCorazon.width, cCorazon.height);
+            ctxCorazon.globalCompositeOperation = 'lighter';
+            for (let i = 0; i < particulas.length; i++) { particulas[i].actualizar(); }
+            animacionCorazonID = requestAnimationFrame(animarParticulas);
+        }
+
+        function detenerCorazonParticulas() { cancelAnimationFrame(animacionCorazonID); document.getElementById('titulo-particulas').style.opacity = '0'; }
+    </script>
+</body>
+</html>
