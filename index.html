@@ -21,10 +21,10 @@
             position: absolute; top: 0; left: 0; 
             width: 100%; height: 100%; display: flex; flex-direction: column; 
             justify-content: center; align-items: center; 
-            z-index: 2; opacity: 0; transition: opacity 1s ease; 
-            pointer-events: none; 
+            z-index: 2; opacity: 0; transition: opacity 1s ease, visibility 1s ease; 
+            pointer-events: none; visibility: hidden; /* FIX: Destruye el muro invisible táctil */
         }
-        .visible { opacity: 1; pointer-events: auto; }
+        .visible { opacity: 1; pointer-events: auto !important; visibility: visible; z-index: 100 !important; /* FIX: Obliga a la pantalla actual a estar al frente */ }
         
         /* TEXTOS Y BOTONES GLOBALES */
         .texto-gigante { font-size: 3rem; text-align: center; line-height: 1.5; text-shadow: 0 0 15px rgba(255, 77, 148, 0.8); padding: 0 10px; }
@@ -116,7 +116,6 @@
         #zona-texto { text-align: center; width: 90%; max-width: 600px; margin-top: 60px; min-height: 120px; display: flex; flex-direction: column; align-items: center; z-index: 10;}
         #zona-arbol { width: 250px; height: 350px; position: relative; margin-top: auto; margin-bottom: 20px; display: flex; justify-content: center; z-index: 5;}
 
-
         /* REGALO 7 (CORAZÓN ESPACIAL BRILLANTE) */
         #regalo-7 { background: radial-gradient(ellipse at center, #050510 0%, #000000 100%); }
         #canvas-corazon { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
@@ -205,62 +204,50 @@
         
         <div style="width: 90%; max-width: 1000px; height: 75vh; overflow-y: auto;">
             <div class="yt-grid">
-                
                 <div class="yt-item">
                     <iframe width="100%" height="160" src="https://www.youtube.com/embed/4M0LqM67dz8" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
                     <p>"Para recordarte que a tu lado quiero vivir sin miedo, porque tú eres mi química y mi suerte."</p>
                 </div>
-                
                 <div class="yt-item" style="border-color: #ff4d94;">
                     <iframe width="100%" height="160" src="https://www.youtube.com/embed/oQvqDYrCi_k" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
                     <p style="color: #00e6ff;">"Porque te prometo que nunca, jamás, te librarás de mí. Llegué para quedarme a tu lado."</p>
                 </div>
-                
                 <div class="yt-item">
                     <iframe width="100%" height="160" src="https://www.youtube.com/embed/9S84EBZaodc" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
                     <p>"No importa el lugar ni el momento, mi lugar favorito en el mundo siempre será donde estés tú."</p>
                 </div>
-                
                 <div class="yt-item" style="border-color: #ff4d94;">
                     <iframe width="100%" height="160" src="https://www.youtube.com/embed/Tl9R4aLVIu8" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
                     <p style="color: #00e6ff;">"Para esos momentos divertidos y locos que solo nosotros entendemos. Contigo la vida es una aventura."</p>
                 </div>
-                
                 <div class="yt-item">
                     <iframe width="100%" height="160" src="https://www.youtube.com/embed/fsFuF6dDoKM" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
                     <p>"Es por ti que cada día tiene sentido. Todo lo que hago y lo que sueño lleva tu nombre."</p>
                 </div>
-                
                 <div class="yt-item" style="border-color: #ff4d94;">
                     <iframe width="100%" height="160" src="https://www.youtube.com/embed/wqIgN6PFBmE" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
                     <p style="color: #00e6ff;">"Nuestra historia es como esta melodía: hermosa, única y capaz de darle color a mi mundo entero."</p>
                 </div>
-                
                 <div class="yt-item">
                     <iframe width="100%" height="160" src="https://www.youtube.com/embed/9bGFko9SM0M" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
                     <p>"Desde que apareciste, toda mi vida se iluminó. Tú eres esa luz que siempre estuve buscando."</p>
                 </div>
-                
                 <div class="yt-item" style="border-color: #ff4d94;">
                     <iframe width="100%" height="160" src="https://www.youtube.com/embed/cRqTvWWX70Y" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
                     <p style="color: #00e6ff;">"Para presumirle al mundo entero que tengo a la niña más increíble de todo el universo."</p>
                 </div>
-                
                 <div class="yt-item">
                     <iframe width="100%" height="160" src="https://www.youtube.com/embed/cRqTvWWX70Y" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
                     <p>"Y por si no quedó claro con la anterior... ¡me tienes completamente loco y enamorado!"</p>
                 </div>
-                
                 <div class="yt-item" style="border-color: #ff4d94;">
                     <iframe width="100%" height="160" src="https://www.youtube.com/embed/DHyaBjK1CVY" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
                     <p style="color: #00e6ff;">"Nuestra conexión es de otro mundo, algo tan profundo que no se puede explicar con palabras."</p>
                 </div>
-                
                 <div class="yt-item">
                     <iframe width="100%" height="160" src="https://www.youtube.com/embed/fsFuF6dDoKM" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
                     <p>"Y para cerrar, te lo repito: todo es por ti, mi Luz. Gracias por estos cinco años juntos."</p>
                 </div>
-
             </div>
         </div>
     </div>
@@ -364,7 +351,6 @@
     </div>
 
     <script>
-        // --- DETECTOR MÓVIL PARA ANTI-LAG ---
         const isMobile = window.innerWidth < 768;
 
         function irAPantalla(idDestino) {
@@ -432,7 +418,6 @@
             }
         }
         
-        // FIX 1: Guardamos el intervalo en una variable para poder detenerlo
         let intervaloMatrix = setInterval(dibujarMatrix, isMobile ? 60 : 35); 
 
         // --- TIMELINE ---
@@ -461,7 +446,7 @@
                     document.getElementById('porcentaje').style.display = 'none'; 
                     document.getElementById('texto-carga').style.display = 'none';
                     document.getElementById('msj-listo').style.display = 'block'; 
-                    document.getElementById('btn-magia').style.display = 'block';
+                    document.getElementById('btn-magia').style.display = 'inline-block'; 
                 }
                 document.getElementById('porcentaje').innerText = progreso + '%';
             }, 300);
@@ -476,14 +461,12 @@
             document.getElementById('btn-magia').style.display = 'none'; 
             document.getElementById('msj-listo').style.display = 'none';
             
-            // FIX 2: Detener inmediatamente el Matrix al dar click para liberar al procesador
             clearInterval(intervaloMatrix); 
             canvas.style.display = 'none';
             
             let w = window.innerWidth; let h = window.innerHeight;
             let cont = document.getElementById('contenedor-explosion');
             
-            // FIX 3: Reducir la cantidad de elementos generados para evitar que los celulares colapsen la RAM
             let cols = isMobile ? 4 : 6; let rows = isMobile ? 4 : 6;
             let cellW = w / cols; let cellH = h / rows;
             let totalElementos = cols * rows;
@@ -498,7 +481,6 @@
                     el.innerText = textosAmor[Math.floor(Math.random() * textosAmor.length)];
                 } else {
                     el.classList.add('flotante-img');
-                    // FIX 4: Se eliminó la petición a placehold.co al fallar la imagen. Muchas peticiones web erróneas simultáneas colapsan la red y congelan el touch.
                     el.innerHTML = `<img src="${misFotos[i % 10]}" onerror="this.style.display='none'"/>`; 
                 }
                 cont.appendChild(el);
@@ -515,7 +497,6 @@
                 }, 50);
             }
             
-            // FIX 5: Bajar el tiempo de espera de 10000 (10 segundos) a 4000 (4 segundos). Antes daba la ilusión de que se había trabado la pantalla.
             setTimeout(() => { document.getElementById('pantalla-carga').classList.remove('visible'); irAPantalla('pantalla-menu'); }, 4000); 
         }
 
