@@ -12,19 +12,20 @@
             margin: 0; padding: 0; width: 100%; height: 100%; 
             background: #000; overflow: hidden; 
             font-family: 'Press Start 2P', cursive; color: #ff4d94; 
+            touch-action: none; /* Evita scrolls accidentales en el celular */
         }
         
-        #matrix-canvas { position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none; }
+        #matrix-canvas { position: absolute; top: 0; left: 0; z-index: 1; }
         
         /* SISTEMA DE PANTALLAS */
         .pantalla { 
             position: absolute; top: 0; left: 0; 
             width: 100%; height: 100%; display: flex; flex-direction: column; 
             justify-content: center; align-items: center; 
-            z-index: 2; opacity: 0; transition: opacity 1s ease, visibility 1s ease; 
-            pointer-events: none; visibility: hidden; /* FIX: Destruye el muro invisible táctil */
+            z-index: 2; opacity: 0; transition: opacity 1s ease; 
+            pointer-events: none; 
         }
-        .visible { opacity: 1; pointer-events: auto !important; visibility: visible; z-index: 100 !important; /* FIX: Obliga a la pantalla actual a estar al frente */ }
+        .visible { opacity: 1; pointer-events: auto; }
         
         /* TEXTOS Y BOTONES GLOBALES */
         .texto-gigante { font-size: 3rem; text-align: center; line-height: 1.5; text-shadow: 0 0 15px rgba(255, 77, 148, 0.8); padding: 0 10px; }
@@ -36,19 +37,17 @@
             border: 4px solid #fff; border-radius: 8px;
             padding: 15px 20px; font-size: 0.8rem; cursor: pointer;
             box-shadow: 4px 4px 0px #000; transition: transform 0.2s ease;
-            position: relative; z-index: 1000;
         }
         .btn-retro:active { transform: translate(4px, 4px) !important; box-shadow: 0px 0px 0px #000; }
-        .btn-volver { position: absolute; top: 20px; left: 20px; font-size: 0.6rem; padding: 10px; z-index: 9999; }
-        .btn-magia { background: #ff1a75; color: #fff; box-shadow: 0 0 15px #ff1a75; display: none; z-index: 9999; margin-top: 30px; }
+        .btn-volver { position: absolute; top: 20px; left: 20px; font-size: 0.6rem; padding: 10px; z-index: 50; }
 
         /* INTRODUCCIÓN */
         .corazon-gigante { font-family: Arial, sans-serif; font-size: 8rem; color: #ff1a75; line-height: 1; text-align: center; margin: 0; animation: latido 1.5s infinite alternate; text-shadow: 0 0 20px #ff1a75, 0 0 40px #ff4d94; }
         @keyframes latido { from { transform: scale(1); } to { transform: scale(1.15); } }
         #pantalla-carga { background: radial-gradient(circle at center, #1a0033 0%, #000000 100%); z-index: 5; }
         #porcentaje { color: #ff4d94; margin-top: 20px; font-size: 2rem; }
-        
-        .flotante { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); opacity: 0; transition: all 2s cubic-bezier(0.1, 0.8, 0.3, 1); pointer-events: none; }
+        .btn-magia { background: #ff1a75; color: #fff; box-shadow: 0 0 15px #ff1a75; display: none; z-index: 10; margin-top: 30px; }
+        .flotante { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); opacity: 0; transition: all 2s cubic-bezier(0.1, 0.8, 0.3, 1); }
         .flotante-texto { font-family: 'Press Start 2P', cursive; color: #fff; text-shadow: 0 0 10px #ff1a75, 0 0 20px #ff4d94, 0 0 30px #fff; font-size: 1rem; z-index: 20; text-align: center; white-space: nowrap; }
         .flotante-img { z-index: 10; }
         .flotante-img img { width: 100px; border-radius: 5px; border: 3px solid #ff4d94; box-shadow: 0 0 15px rgba(255, 77, 148, 0.6); }
@@ -61,7 +60,7 @@
         .img-gatito { width: 250px; margin-bottom: 20px; image-rendering: pixelated; max-width: 80%; }
         
         #pantalla-regalos { background: radial-gradient(circle at bottom, #001133 0%, #000000 100%); z-index: 10; overflow: hidden; }
-        .estrella { position: absolute; background: white; border-radius: 50%; box-shadow: 0 0 5px #fff, 0 0 10px #00e6ff; animation: parpadeo infinite alternate; z-index: 0; pointer-events: none; }
+        .estrella { position: absolute; background: white; border-radius: 50%; box-shadow: 0 0 5px #fff, 0 0 10px #00e6ff; animation: parpadeo infinite alternate; z-index: 0; }
         @keyframes parpadeo { 0% { opacity: 0.2; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1.2); } }
         
         .grid-regalos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 700px; width: 90%; margin-top: 30px; padding: 0 10px; z-index: 2; overflow-y: auto; max-height: 70vh; }
@@ -81,7 +80,8 @@
         .yt-item p { font-family: 'Courier New', Courier, monospace; font-size: 0.85rem; font-weight: bold; color: #ffb3d9; margin-top: 15px; line-height: 1.4; text-align: center; }
 
         /* REGALO 3 (POKÉMON) */
-        #poke-fondo-animado { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; background: linear-gradient(120deg, #1a2a6c, #11998e, #38ef7d); background-size: 400% 400%; animation: gradienteCielo 15s ease infinite; pointer-events: none;}
+        #poke-fondo-animado { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; background: linear-gradient(120deg, #1a2a6c, #11998e, #38ef7d); background-size: 400% 400%; animation: gradienteCielo 15s ease infinite; }
+        @keyframes gradienteCielo { 0% {background-position: 0% 50%} 50% {background-position: 100% 50%} 100% {background-position: 0% 50%} }
         #poke-campo { position: relative; width: 90%; max-width: 800px; height: 60vh; min-height: 350px; margin: 0 auto; background-color: #4CAF50; border: 5px solid #fff; border-radius: 15px; z-index: 2; overflow: hidden; }
         .pokeball-container { position: absolute; width: 45px; height: 45px; cursor: pointer; z-index: 5; transition: left 4s linear, top 4s linear; }
         .pokeball { width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(150deg, #ff4d4d 0%, #b30000 46%, #111 46%, #111 54%, #e6e6e6 54%, #ffffff 100%); border: 3px solid #222; position: relative; }
@@ -109,16 +109,14 @@
         .puzzle-piece { width: 100%; height: 100%; background-image: url('rc.png'); background-size: 800% 500%; cursor: grab; border: 1px solid rgba(255,255,255,0.2); }
         .puzzle-piece:active { opacity: 0.7; z-index: 10; }
 
-        /* REGALO 6 (ÁRBOL - AJUSTADO PARA EVITAR SUPERPOSICIÓN) */
-        #regalo-6 { background-color: #FAF0E6 !important; justify-content: flex-start; }
+        /* REGALO 6 (ÁRBOL) */
+        #regalo-6 { background-color: #FAF0E6 !important; }
         .rama-svg { stroke-dasharray: 1000; stroke-dashoffset: 1000; transition: stroke-dashoffset 4s ease-in-out; }
         .dibujar .rama-svg { stroke-dashoffset: 0; }
-        #zona-texto { text-align: center; width: 90%; max-width: 600px; margin-top: 60px; min-height: 120px; display: flex; flex-direction: column; align-items: center; z-index: 10;}
-        #zona-arbol { width: 250px; height: 350px; position: relative; margin-top: auto; margin-bottom: 20px; display: flex; justify-content: center; z-index: 5;}
 
         /* REGALO 7 (CORAZÓN ESPACIAL BRILLANTE) */
         #regalo-7 { background: radial-gradient(ellipse at center, #050510 0%, #000000 100%); }
-        #canvas-corazon { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        #canvas-corazon { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         .titulo-i-love-you { position: absolute; top: 12%; width: 100%; text-align: center; color: #00e6ff; font-family: 'Dancing Script', cursive; font-size: 3rem; text-shadow: 0 0 25px #00e6ff; opacity: 0; transition: opacity 2s ease; z-index: 10; pointer-events: none;}
 
         /* --- MEDIA QUERIES PARA ADAPTAR A CELULAR --- */
@@ -130,10 +128,6 @@
             .carta-contenedor { padding: 15px; font-size: 0.9rem; }
             #puzzle-grid { width: 98vw; height: calc(98vw * (5/8)); }
             .img-gatito { width: 200px; }
-            #zona-texto { margin-top: 70px; min-height: 140px; }
-            #texto-poema { font-size: 1.3rem !important; }
-            #zona-arbol { height: 280px; } 
-            #corazon-flores { top: 0px !important; }
         }
     </style>
 </head>
@@ -204,50 +198,62 @@
         
         <div style="width: 90%; max-width: 1000px; height: 75vh; overflow-y: auto;">
             <div class="yt-grid">
+                
                 <div class="yt-item">
                     <iframe width="100%" height="160" src="https://www.youtube.com/embed/4M0LqM67dz8" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
                     <p>"Para recordarte que a tu lado quiero vivir sin miedo, porque tú eres mi química y mi suerte."</p>
                 </div>
+                
                 <div class="yt-item" style="border-color: #ff4d94;">
                     <iframe width="100%" height="160" src="https://www.youtube.com/embed/oQvqDYrCi_k" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
                     <p style="color: #00e6ff;">"Porque te prometo que nunca, jamás, te librarás de mí. Llegué para quedarme a tu lado."</p>
                 </div>
+                
                 <div class="yt-item">
                     <iframe width="100%" height="160" src="https://www.youtube.com/embed/9S84EBZaodc" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
                     <p>"No importa el lugar ni el momento, mi lugar favorito en el mundo siempre será donde estés tú."</p>
                 </div>
+                
                 <div class="yt-item" style="border-color: #ff4d94;">
                     <iframe width="100%" height="160" src="https://www.youtube.com/embed/Tl9R4aLVIu8" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
                     <p style="color: #00e6ff;">"Para esos momentos divertidos y locos que solo nosotros entendemos. Contigo la vida es una aventura."</p>
                 </div>
+                
                 <div class="yt-item">
                     <iframe width="100%" height="160" src="https://www.youtube.com/embed/fsFuF6dDoKM" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
                     <p>"Es por ti que cada día tiene sentido. Todo lo que hago y lo que sueño lleva tu nombre."</p>
                 </div>
+                
                 <div class="yt-item" style="border-color: #ff4d94;">
                     <iframe width="100%" height="160" src="https://www.youtube.com/embed/wqIgN6PFBmE" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
                     <p style="color: #00e6ff;">"Nuestra historia es como esta melodía: hermosa, única y capaz de darle color a mi mundo entero."</p>
                 </div>
+                
                 <div class="yt-item">
                     <iframe width="100%" height="160" src="https://www.youtube.com/embed/9bGFko9SM0M" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
                     <p>"Desde que apareciste, toda mi vida se iluminó. Tú eres esa luz que siempre estuve buscando."</p>
                 </div>
+                
                 <div class="yt-item" style="border-color: #ff4d94;">
                     <iframe width="100%" height="160" src="https://www.youtube.com/embed/cRqTvWWX70Y" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
                     <p style="color: #00e6ff;">"Para presumirle al mundo entero que tengo a la niña más increíble de todo el universo."</p>
                 </div>
+                
                 <div class="yt-item">
                     <iframe width="100%" height="160" src="https://www.youtube.com/embed/cRqTvWWX70Y" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
                     <p>"Y por si no quedó claro con la anterior... ¡me tienes completamente loco y enamorado!"</p>
                 </div>
+                
                 <div class="yt-item" style="border-color: #ff4d94;">
                     <iframe width="100%" height="160" src="https://www.youtube.com/embed/DHyaBjK1CVY" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
                     <p style="color: #00e6ff;">"Nuestra conexión es de otro mundo, algo tan profundo que no se puede explicar con palabras."</p>
                 </div>
+                
                 <div class="yt-item">
                     <iframe width="100%" height="160" src="https://www.youtube.com/embed/fsFuF6dDoKM" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="border-radius: 8px; border: 1px solid #444;"></iframe>
                     <p>"Y para cerrar, te lo repito: todo es por ti, mi Luz. Gracias por estos cinco años juntos."</p>
                 </div>
+
             </div>
         </div>
     </div>
@@ -255,12 +261,12 @@
     <!-- REGALO 3: POKÉMON -->
     <div id="regalo-3" class="pantalla" style="z-index: 20; overflow: hidden;">
         <div id="poke-fondo-animado"></div>
-        <button class="btn-retro btn-volver" style="color: #333; border-color: #333; z-index: 1000;" onclick="irAPantalla('pantalla-regalos')">Volver</button>
+        <button class="btn-retro btn-volver" style="color: #333; border-color: #333; z-index: 10;" onclick="irAPantalla('pantalla-regalos')">Volver</button>
         <h1 class="texto-gigante" style="font-size: 1rem; text-shadow: 2px 2px 0px #000; color: #fff; margin-top: 50px; margin-bottom: 10px; z-index: 10; padding: 0 15px;">Una de estas pokéballs contiene tu regalo. ¡Atrápala!</h1>
         <div style="width: 100%; display: flex; justify-content: center; align-items: center; flex-grow: 1; padding-bottom: 30px;">
             <div id="poke-campo"></div>
         </div>
-        <div id="poke-modal" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(0,0,0,0.85); padding:20px; text-align:center; border: 4px solid #fff; border-radius: 10px; z-index: 1000; width: 85%; max-width: 320px;">
+        <div id="poke-modal" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(0,0,0,0.85); padding:20px; text-align:center; border: 4px solid #fff; border-radius: 10px; z-index: 100; width: 85%; max-width: 320px;">
             <h2 id="poke-titulo" style="color:#ffcc00; font-size: 1.2rem; margin-bottom: 15px;">¡OH NO!</h2>
             <p id="poke-msj" style="color:#fff; font-size: 0.7rem; font-family: 'Press Start 2P', cursive; line-height: 1.5;"></p>
             <img id="poke-img" src="futuro.png" onerror="this.src='https://placehold.co/200/ff4d94/FFF?text=FUTURO.PNG'" style="display:none; width: 100%; max-width: 200px; margin: 15px auto; border: 2px solid #fff; border-radius: 8px;">
@@ -302,55 +308,57 @@
         <button class="btn-retro btn-volver" onclick="irAPantalla('pantalla-regalos')">Volver</button>
         <h1 class="texto-gigante" style="font-size: 1.2rem; margin-top: 40px; margin-bottom: 20px;">Arma nuestro recuerdo</h1>
         
-        <div id="puzzle-grid" style="touch-action: none;"></div>
-        
-        <video id="puzzle-video" src="premio.mp4" playsinline webkit-playsinline preload="auto" style="display: none; width: 90%; max-width: 800px; border: 4px solid #fff; border-radius: 10px; box-shadow: 0 0 20px #ff4d94;" controls></video>
+        <div id="puzzle-grid"></div>
+        <video id="puzzle-video" src="premio.mp4" style="display: none; width: 90%; max-width: 800px; border: 4px solid #fff; border-radius: 10px; box-shadow: 0 0 20px #ff4d94;" controls></video>
 
-        <div id="puzzle-modal" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(0,0,0,0.9); padding:20px; text-align:center; border: 4px solid #ff4d94; border-radius: 10px; z-index: 1000; width: 80%;">
+        <div id="puzzle-modal" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(0,0,0,0.9); padding:20px; text-align:center; border: 4px solid #ff4d94; border-radius: 10px; z-index: 100; width: 80%;">
             <h2 style="color:#ffcc00; font-size: 1rem; margin-bottom: 15px; line-height: 1.5;">Felicidades, yo sabía que podrías y que cada vez avanzas más y eres más lista.</h2>
             <button class="btn-retro" style="margin-top: 15px;" onclick="cerrarPuzzleYVerVideo()">VER SORPRESA</button>
         </div>
     </div>
     
-    <!-- REGALO 6: EL ÁRBOL (REESTRUCTURADO) -->
+    <!-- REGALO 6: EL ÁRBOL -->
     <div id="regalo-6" class="pantalla" style="z-index: 20; color: #333; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
-        <button class="btn-retro btn-volver" style="color: #333; border-color: #333; z-index: 1000;" onclick="irAPantalla('pantalla-regalos')">Volver</button>
+        <button class="btn-retro btn-volver" style="color: #333; border-color: #333; z-index: 50;" onclick="irAPantalla('pantalla-regalos')">Volver</button>
         
-        <div id="zona-texto" style="opacity: 0; transition: opacity 1.5s ease;">
-            <div style="font-family: 'Press Start 2P', cursive; font-size: 0.6rem; margin-bottom: 15px; color: #666; line-height: 1.4;">Flores de cerezo para el amor de mi vida:</div>
-            <div id="texto-poema" style="font-family: 'Dancing Script', cursive; font-size: 1.8rem; line-height: 1.4; color: #4a4a4a; font-weight: 700;"></div>
-            <div style="font-family: 'Courier New', Courier, monospace; font-size: 0.8rem; color: #888; font-weight: bold; margin-top: 10px;">Nuestro tiempo juntos:</div>
-            <div id="contador-tiempo" style="font-size: 0.9rem; color: #4a4a4a; font-family: 'Courier New', Courier, monospace; font-weight: bold;"></div>
-        </div>
-
-        <div id="zona-arbol">
-            <div style="position: absolute; bottom: 0; width: 150%; left: -25%; height: 3px; background-color: #333;"></div>
-            <div id="semilla-obj" onclick="crearMagiaArbol()" style="position: absolute; bottom: 0; cursor: pointer; text-align: center; transition: opacity 0.5s ease; z-index: 10;">
-                <div style="width: 25px; height: 15px; background: #654321; border-radius: 50% 50% 0 0; margin: 0 auto;"></div>
-                <div id="mensaje-semilla" style="font-size: 0.6rem; margin-top: 10px; color: #888; font-family: 'Press Start 2P', cursive; animation: latido 1.5s infinite alternate;">TÓCAME</div>
+        <div style="position: relative; width: 90%; max-width: 900px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <div id="zona-texto" style="position: absolute; top: 10%; width: 90%; opacity: 0; transition: opacity 1.5s ease; text-align: center;">
+                <div style="font-family: 'Press Start 2P', cursive; font-size: 0.6rem; margin-bottom: 15px; color: #666; line-height: 1.4;">Flores de cerezo para el amor de mi vida:</div>
+                <div id="texto-poema" style="font-family: 'Dancing Script', cursive; font-size: 1.5rem; line-height: 1.4; color: #4a4a4a; min-height: 100px; font-weight: 700;"></div>
+                <div style="font-family: 'Courier New', Courier, monospace; font-size: 0.8rem; color: #888; font-weight: bold; margin-top: 10px;">Nuestro tiempo juntos:</div>
+                <div id="contador-tiempo" style="font-size: 0.9rem; color: #4a4a4a; font-family: 'Courier New', Courier, monospace; font-weight: bold;"></div>
             </div>
-            <svg id="tronco-svg" viewBox="0 0 200 300" style="position: absolute; bottom: 0; width: 100%; height: 100%; pointer-events: none;">
-                <g fill="none" stroke="#6b4423" stroke-linecap="round" stroke-linejoin="round">
-                    <path class="rama-svg" d="M100,300 Q100,180 100,80" stroke-width="12" />
-                    <path class="rama-svg" d="M100,230 Q60,180 30,130" stroke-width="8" />
-                    <path class="rama-svg" d="M100,200 Q150,150 170,100" stroke-width="8" />
-                    <path class="rama-svg" d="M70,185 Q40,140 50,90" stroke-width="5" />
-                    <path class="rama-svg" d="M135,165 Q170,110 140,50" stroke-width="5" />
-                    <path class="rama-svg" d="M100,140 Q120,90 90,40" stroke-width="5" />
-                </g>
-            </svg>
-            <div id="corazon-flores" style="position: absolute; top: 15px; width: 250px; height: 250px; pointer-events: none;"></div>
+
+            <div id="zona-arbol" style="position: absolute; bottom: 5%; width: 250px; height: 350px; display: flex; justify-content: center;">
+                <div style="position: absolute; bottom: 0; width: 150%; left: -25%; height: 3px; background-color: #333;"></div>
+                <div id="semilla-obj" onclick="crearMagiaArbol()" style="position: absolute; bottom: 0; cursor: pointer; text-align: center; transition: opacity 0.5s ease; z-index: 10;">
+                    <div style="width: 25px; height: 15px; background: #654321; border-radius: 50% 50% 0 0; margin: 0 auto;"></div>
+                    <div id="mensaje-semilla" style="font-size: 0.6rem; margin-top: 10px; color: #888; font-family: 'Press Start 2P', cursive; animation: latido 1.5s infinite alternate;">TÓCAME</div>
+                </div>
+                <svg id="tronco-svg" viewBox="0 0 200 300" style="position: absolute; bottom: 0; width: 200px; height: 280px; pointer-events: none;">
+                    <g fill="none" stroke="#6b4423" stroke-linecap="round" stroke-linejoin="round">
+                        <path class="rama-svg" d="M100,300 Q100,180 100,80" stroke-width="12" />
+                        <path class="rama-svg" d="M100,230 Q60,180 30,130" stroke-width="8" />
+                        <path class="rama-svg" d="M100,200 Q150,150 170,100" stroke-width="8" />
+                        <path class="rama-svg" d="M70,185 Q40,140 50,90" stroke-width="5" />
+                        <path class="rama-svg" d="M135,165 Q170,110 140,50" stroke-width="5" />
+                        <path class="rama-svg" d="M100,140 Q120,90 90,40" stroke-width="5" />
+                    </g>
+                </svg>
+                <div id="corazon-flores" style="position: absolute; top: 15px; width: 250px; height: 250px; pointer-events: none;"></div>
+            </div>
         </div>
     </div>
 
     <!-- REGALO 7: CORAZÓN AZUL -->
     <div id="regalo-7" class="pantalla" style="z-index: 20; overflow: hidden;">
-        <button class="btn-retro btn-volver" style="background: rgba(255,255,255,0.1); color: #fff; border-color: #00e6ff; text-shadow: 0 0 5px #00e6ff; z-index: 1000;" onclick="irAPantalla('pantalla-regalos')">Volver</button>
+        <button class="btn-retro btn-volver" style="background: rgba(255,255,255,0.1); color: #fff; border-color: #00e6ff; text-shadow: 0 0 5px #00e6ff;" onclick="irAPantalla('pantalla-regalos')">Volver</button>
         <div id="titulo-particulas" class="titulo-i-love-you">I Love You</div>
-        <canvas id="canvas-corazon" style="z-index: 1; position: absolute; pointer-events: auto;"></canvas>
+        <canvas id="canvas-corazon"></canvas>
     </div>
 
     <script>
+        // --- DETECTOR MÓVIL PARA ANTI-LAG ---
         const isMobile = window.innerWidth < 768;
 
         function irAPantalla(idDestino) {
@@ -417,8 +425,7 @@
                 gotas[i]++;
             }
         }
-        
-        let intervaloMatrix = setInterval(dibujarMatrix, isMobile ? 60 : 35); 
+        setInterval(dibujarMatrix, isMobile ? 60 : 35); 
 
         // --- TIMELINE ---
         setTimeout(() => { document.getElementById('pantalla-conteo').classList.add('visible'); document.getElementById('texto-conteo').innerText = '3'; }, 500);
@@ -446,7 +453,7 @@
                     document.getElementById('porcentaje').style.display = 'none'; 
                     document.getElementById('texto-carga').style.display = 'none';
                     document.getElementById('msj-listo').style.display = 'block'; 
-                    document.getElementById('btn-magia').style.display = 'inline-block'; 
+                    document.getElementById('btn-magia').style.display = 'block';
                 }
                 document.getElementById('porcentaje').innerText = progreso + '%';
             }, 300);
@@ -458,16 +465,11 @@
         for(let f = 1; f <= 10; f++) { misFotos.push(`foto_${f}.png`); }
 
         function detonarExplosion() {
-            document.getElementById('btn-magia').style.display = 'none'; 
-            document.getElementById('msj-listo').style.display = 'none';
-            
-            clearInterval(intervaloMatrix); 
-            canvas.style.display = 'none';
-            
+            document.getElementById('btn-magia').style.display = 'none'; document.getElementById('msj-listo').style.display = 'none';
             let w = window.innerWidth; let h = window.innerHeight;
             let cont = document.getElementById('contenedor-explosion');
             
-            let cols = isMobile ? 4 : 6; let rows = isMobile ? 4 : 6;
+            let cols = isMobile ? 5 : 9; let rows = isMobile ? 5 : 9;
             let cellW = w / cols; let cellH = h / rows;
             let totalElementos = cols * rows;
 
@@ -481,7 +483,7 @@
                     el.innerText = textosAmor[Math.floor(Math.random() * textosAmor.length)];
                 } else {
                     el.classList.add('flotante-img');
-                    el.innerHTML = `<img src="${misFotos[i % 10]}" onerror="this.style.display='none'"/>`; 
+                    el.innerHTML = `<img src="${misFotos[i % 10]}" onerror="this.src='https://placehold.co/100/ff4d94/FFF?text=FOTO'"/>`; 
                 }
                 cont.appendChild(el);
 
@@ -496,8 +498,7 @@
                     el.style.opacity = '1';
                 }, 50);
             }
-            
-            setTimeout(() => { document.getElementById('pantalla-carga').classList.remove('visible'); irAPantalla('pantalla-menu'); }, 4000); 
+            setTimeout(() => { document.getElementById('pantalla-carga').classList.remove('visible'); irAPantalla('pantalla-menu'); canvas.style.display = 'none'; }, 10000); 
         }
 
         // --- LÓGICA DEL REGALO 3 ---
@@ -780,9 +781,8 @@
         // --- LÓGICA DEL REGALO 7 ---
         let cCorazon = document.getElementById("canvas-corazon"); let ctxCorazon = cCorazon.getContext("2d");
         let particulas = []; let animacionCorazonID; let mouse = { x: null, y: null, radius: 100 };
-        
-        cCorazon.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
-        cCorazon.addEventListener('touchmove', (e) => { mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; });
+        window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+        window.addEventListener('touchmove', (e) => { mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; });
 
         class Particula {
             constructor(x, y) {
